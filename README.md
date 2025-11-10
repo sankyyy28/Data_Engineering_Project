@@ -12,11 +12,7 @@ A machine learning web application that predicts sales for BigMart products usin
 - **Developer Profile**: Contact information and social links
 
 ## Architecture Overview
-
-```
-BigMart Sales Predictor Architecture
-![Uploading deepseek_mermaid_20251110_bf4f86.png…]()
-
+<img width="2385" height="3817" alt="deepseek_mermaid_20251110_bf4f86" src="https://github.com/user-attachments/assets/29c36eba-cbe3-44fa-b348-92d2c4fb5c7d" />
 
 ## Installation & Usage
 
