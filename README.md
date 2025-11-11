@@ -3,7 +3,7 @@
 ## Overview
 A machine learning web application that predicts sales for BigMart products using a Gradient Boosting model. The app provides an intuitive interface for users to input product and outlet details to get sales predictions.
 
-👉 Live Demo: http://localhost:8502/
+👉 Live Demo: https://dataengineeringproject.streamlit.app/
 
 ## Features
 - **Sales Prediction**: Predict product sales based on various features
