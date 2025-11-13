@@ -21,15 +21,31 @@ def load_model():
         
         # Check if it's a tuple (multiple objects)
         if isinstance(loaded_data, tuple):
-            # Assume the first element is the model
-            model = loaded_data[0]
-            st.sidebar.success(f"Loaded model from tuple with {len(loaded_data)} elements")
+            # Try to find the model in the tuple
+            model = None
+            for item in loaded_data:
+                if hasattr(item, 'predict'):
+                    model = item
+                    break
+            
+            if model is None:
+                # If no object with predict method found, use the first item
+                model = loaded_data[0]
+                st.sidebar.warning("Using first element of tuple as model")
+            else:
+                st.sidebar.success(f"Model found in tuple with {len(loaded_data)} elements")
             return model
-        else:
+        elif hasattr(loaded_data, 'predict'):
             # It's a single model object
             st.sidebar.success("Model loaded successfully")
             return loaded_data
+        else:
+            st.sidebar.error("Loaded object doesn't have predict method")
+            return None
             
+    except FileNotFoundError:
+        st.sidebar.error("Model file 'bigmart_best_model.pkl' not found")
+        return None
     except Exception as e:
         st.sidebar.error(f"Error loading model: {str(e)}")
         return None
@@ -64,8 +80,28 @@ st.markdown("""
     .social-links a:hover {
         color: #ff6b6b;
     }
+    .error-box {
+        background-color: #ffe6e6;
+        padding: 1rem;
+        border-radius: 10px;
+        border-left: 5px solid #ff4444;
+        margin: 1rem 0;
+    }
 </style>
 """, unsafe_allow_html=True)
+
+def preprocess_input(data):
+    """Preprocess the input data to match model training format"""
+    df = data.copy()
+    
+    # Handle categorical variables - convert to same format as training
+    fat_content_mapping = {'Low Fat': 'Low Fat', 'Regular': 'Regular'}
+    df['Item_Fat_Content'] = df['Item_Fat_Content'].map(fat_content_mapping)
+    
+    # For other categorical variables, we'll rely on the model's preprocessing
+    # or one-hot encoding that was applied during training
+    
+    return df
 
 def main():
     # Sidebar
@@ -117,7 +153,7 @@ def main():
                 item_fat_content = st.selectbox("Fat Content", ["Low Fat", "Regular"])
                 
             with col1b:
-                item_visibility = st.slider("Item Visibility", min_value=0.0, max_value=1.0, value=0.065, step=0.001)
+                item_visibility = st.slider("Item Visibility", min_value=0.0, max_value=1.0, value=0.07, step=0.001)
                 item_type = st.selectbox("Item Type", [
                     "Dairy", "Soft Drinks", "Meat", "Fruits and Vegetables", 
                     "Household", "Baking Goods", "Snack Foods", "Frozen Foods",
@@ -162,7 +198,15 @@ def main():
                 model = load_model()
                 
                 if model is None:
+                    st.markdown('<div class="error-box">', unsafe_allow_html=True)
                     st.error("Model failed to load. Please check the model file.")
+                    st.info("""
+                    **Troubleshooting tips:**
+                    - Ensure 'bigmart_best_model.pkl' is in the same directory
+                    - Check if the pickle file is not corrupted
+                    - Verify the model was trained with compatible libraries
+                    """)
+                    st.markdown('</div>', unsafe_allow_html=True)
                     return
                 
                 # Create input dataframe
@@ -180,8 +224,11 @@ def main():
                     'Outlet_Age': [outlet_age]
                 })
                 
+                # Preprocess input
+                processed_data = preprocess_input(input_data)
+                
                 # Make prediction
-                prediction = model.predict(input_data)[0]
+                prediction = model.predict(processed_data)[0]
                 
                 # Display prediction
                 st.markdown('<div class="prediction-box">', unsafe_allow_html=True)
@@ -205,8 +252,15 @@ def main():
                 st.caption(f"Sales performance: {performance_percent:.1f}% of maximum potential")
                 
             except Exception as e:
+                st.markdown('<div class="error-box">', unsafe_allow_html=True)
                 st.error(f"Error making prediction: {str(e)}")
-                st.info("Please check your input values and try again.")
+                st.info("""
+                **Possible solutions:**
+                - Check if all input values are valid
+                - Ensure categorical values match training data format
+                - Verify the model expects the same features
+                """)
+                st.markdown('</div>', unsafe_allow_html=True)
         
         else:
             # Placeholder before prediction
