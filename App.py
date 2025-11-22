@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import pickle
 import os
+import sys
 
 # Set page configuration - THIS MUST BE THE FIRST STREAMLIT COMMAND
 st.set_page_config(
@@ -82,16 +83,36 @@ if 'use_demo_model' not in st.session_state:
     st.session_state.use_demo_model = False
 if 'real_model' not in st.session_state:
     st.session_state.real_model = None
+if 'model_error' not in st.session_state:
+    st.session_state.model_error = None
 
 @st.cache_resource
 def load_real_model():
-    """Load the real model with error handling"""
+    """Load the real model with enhanced error handling"""
     try:
         if not os.path.exists('bigmart_best_model.pkl'):
             return None, "Model file 'bigmart_best_model.pkl' not found"
         
-        with open('bigmart_best_model.pkl', 'rb') as file:
-            model_data = pickle.load(file)
+        # Try to handle the module import error
+        try:
+            with open('bigmart_best_model.pkl', 'rb') as file:
+                model_data = pickle.load(file)
+        except ModuleNotFoundError as e:
+            error_msg = str(e)
+            if 'sitearn.ensemble_gb_bosses' in error_msg:
+                st.warning("Fixing module import error in the model file...")
+                # Create a mock module to handle the import error
+                import types
+                mock_module = types.ModuleType('sitearn')
+                mock_module.ensemble_gb_bosses = types.ModuleType('sitearn.ensemble_gb_bosses')
+                sys.modules['sitearn'] = mock_module
+                sys.modules['sitearn.ensemble_gb_bosses'] = mock_module.ensemble_gb_bosses
+                
+                # Try loading again with the mock module
+                with open('bigmart_best_model.pkl', 'rb') as file:
+                    model_data = pickle.load(file)
+            else:
+                return None, f"Module import error: {error_msg}"
         
         # Handle different model formats
         if hasattr(model_data, 'predict'):
@@ -188,8 +209,8 @@ def main():
         st.subheader("🔧 Model Status")
         
         # Load real model if not already loaded
-        if not st.session_state.model_loaded:
-            with st.spinner("Checking for model..."):
+        if not st.session_state.model_loaded and not st.session_state.use_demo_model:
+            with st.spinner("Loading model..."):
                 real_model, message = load_real_model()
                 if real_model is not None:
                     st.session_state.real_model = real_model
@@ -200,10 +221,12 @@ def main():
                     st.info("Using demo model instead")
                     st.session_state.use_demo_model = True
         
-        if st.session_state.real_model:
+        if st.session_state.model_loaded and st.session_state.real_model:
             st.success("✅ Real model ready!")
-        else:
+        elif st.session_state.use_demo_model:
             st.warning("⚠️ Using demo model")
+        else:
+            st.info("🔄 Model status: Checking...")
             
         st.markdown("---")
         st.subheader("📊 App Info")
@@ -271,7 +294,7 @@ def main():
         
         if submit_btn:
             # Determine which model to use
-            if st.session_state.real_model:
+            if st.session_state.model_loaded and st.session_state.real_model:
                 current_model = st.session_state.real_model
                 model_type = "real"
                 model_message = "Using trained model"
@@ -377,3 +400,4 @@ def main():
 # Run the app
 if __name__ == "__main__":
     main()
+    
