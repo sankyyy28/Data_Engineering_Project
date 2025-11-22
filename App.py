@@ -206,29 +206,6 @@ def main():
         st.markdown("[GitHub](https://github.com/sankyyy28) • [LinkedIn](https://www.linkedin.com/in/sanket-sonparate-018350260)")
         
         st.markdown("---")
-        st.subheader("🔧 Model Status")
-        
-        # Load real model if not already loaded
-        if not st.session_state.model_loaded and not st.session_state.use_demo_model:
-            with st.spinner("Loading model..."):
-                real_model, message = load_real_model()
-                if real_model is not None:
-                    st.session_state.real_model = real_model
-                    st.session_state.model_loaded = True
-                    st.success("✅ " + message)
-                else:
-                    st.error("❌ " + message)
-                    st.info("Using demo model instead")
-                    st.session_state.use_demo_model = True
-        
-        if st.session_state.model_loaded and st.session_state.real_model:
-            st.success("✅ Real model ready!")
-        elif st.session_state.use_demo_model:
-            st.warning("⚠️ Using demo model")
-        else:
-            st.info("🔄 Model status: Checking...")
-            
-        st.markdown("---")
         st.subheader("📊 App Info")
         st.write("Predict BigMart sales using machine learning")
 
@@ -378,6 +355,7 @@ def main():
             3. Click **Predict Sales**
             4. View results here
             """)
+            
             st.markdown('</div>', unsafe_allow_html=True)
             
             # Quick info
@@ -400,4 +378,3 @@ def main():
 # Run the app
 if __name__ == "__main__":
     main()
-    
