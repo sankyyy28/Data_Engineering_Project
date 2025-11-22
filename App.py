@@ -63,6 +63,47 @@ st.markdown("""
         border-left: 5px solid #28a745;
         margin: 1rem 0;
     }
+    .profile-header {
+        text-align: center;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e9ecef;
+        margin-bottom: 1.5rem;
+    }
+    .profile-name {
+        font-size: 1.4rem;
+        font-weight: bold;
+        color: #1f77b4;
+        margin-bottom: 0.5rem;
+    }
+    .profile-title {
+        font-size: 1rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+    .contact-info {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+    }
+    .social-links {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+    .social-btn {
+        padding: 0.5rem 1rem;
+        background: #1f77b4;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background 0.3s;
+    }
+    .social-btn:hover {
+        background: #155a8a;
+        color: white;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -193,21 +234,47 @@ def preprocess_input(input_dict):
         return None, f"Preprocessing error: {str(e)}"
 
 def main():
-    # Sidebar
+    # Sidebar - Enhanced Developer Profile
     with st.sidebar:
-        st.title("👤 Developer Profile")
-        st.subheader("Sanket Sanjay Sonparate")
-        st.write("Data Scientist | ML Engineer")
+        # Profile Header
+        st.markdown('<div class="profile-header">', unsafe_allow_html=True)
+        st.markdown('<div class="profile-name">Sanket Sanjay Sonparate</div>', unsafe_allow_html=True)
+        st.markdown('<div class="profile-title">Data Scientist | ML Engineer</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
         
-        st.markdown("📧 **Contact**")
+        # Contact Information
+        st.subheader("📧 Contact Information")
+        st.markdown('<div class="contact-info">', unsafe_allow_html=True)
+        st.write("**Email:**") 
         st.write("sonparatesanket@gmail.com")
+        st.markdown('</div>', unsafe_allow_html=True)
         
-        st.markdown("🔗 **Social Links**")
-        st.markdown("[GitHub](https://github.com/sankyyy28) • [LinkedIn](https://www.linkedin.com/in/sanket-sonparate-018350260)")
+        # Social Links
+        st.subheader("🔗 Connect With Me")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown(
+                '<a href="https://github.com/sankyyy28" target="_blank" class="social-btn">GitHub</a>',
+                unsafe_allow_html=True
+            )
+        with col2:
+            st.markdown(
+                '<a href="https://www.linkedin.com/in/sanket-sonparate-018350260" target="_blank" class="social-btn">LinkedIn</a>',
+                unsafe_allow_html=True
+            )
         
         st.markdown("---")
-        st.subheader("📊 App Info")
-        st.write("Predict BigMart sales using machine learning")
+        
+        # App Information
+        st.subheader("📊 About This App")
+        st.write("""
+        This BigMart Sales Predictor uses machine learning to forecast product sales based on:
+        - Product characteristics
+        - Store information  
+        - Market conditions
+        """)
+        
+        st.info("💡 **Tip:** Fill in all details accurately for best predictions!")
 
     # Main content area
     st.markdown('<div class="main-header">🛒 BigMart Sales Predictor</div>', unsafe_allow_html=True)
@@ -355,7 +422,6 @@ def main():
             3. Click **Predict Sales**
             4. View results here
             """)
-            
             st.markdown('</div>', unsafe_allow_html=True)
             
             # Quick info
